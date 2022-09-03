@@ -4,7 +4,7 @@
  - Open3D 0.15.1
  - Numpy 1.23.2
  
-## Reference
+## References
 ### Open3D
  - [Global registration](http://www.open3d.org/docs/release/tutorial/pipelines/global_registration.html#Global-registration)
  - [Fast global registratioin](http://www.open3d.org/docs/release/tutorial/pipelines/global_registration.html#Fast-global-registration)
