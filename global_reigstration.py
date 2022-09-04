@@ -11,8 +11,8 @@ TARGET_PCD = "bunny/data/bun045.ply"
 def draw_registration_result(source, target, transformation):
     source_temp = copy.deepcopy(source)
     target_temp = copy.deepcopy(target)
-    source_temp.paint_uniform_color([1, 0.706, 0])
-    target_temp.paint_uniform_color([0, 0.651, 0.929])
+    source_temp.paint_uniform_color([1, 0.706, 0])  # BLUE
+    target_temp.paint_uniform_color([0, 0.651, 0.929])  # YELLOW
     source_temp.transform(transformation)
     o3d.visualization.draw_geometries([source_temp, target_temp])
 
@@ -52,22 +52,19 @@ def prepare_dataset(voxel_size):
 
 
 # RANSAC
-def execute_global_registration(source_down, target_down, source_fpfh,
-                                target_fpfh, voxel_size):
+def execute_global_registration(source_down, target_down, source_fpfh, target_fpfh, voxel_size):
     distance_threshold = voxel_size * 1.5
     print(":: RANSAC registration on downsampled point clouds.")
     print("   Since the downsampling voxel size is %.3f," % voxel_size)
     print("   we use a liberal distance threshold %.3f." % distance_threshold)
     result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
-        source_down, target_down, source_fpfh, target_fpfh, True,
-        distance_threshold,
-        o3d.pipelines.registration.TransformationEstimationPointToPoint(False),
-        3, [
-            o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(
-                0.9),
-            o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(
-                distance_threshold)
-        ], o3d.pipelines.registration.RANSACConvergenceCriteria(100000, 0.999))
+        source_down, target_down, source_fpfh, target_fpfh, True, distance_threshold,
+        o3d.pipelines.registration.TransformationEstimationPointToPoint(False), 3,
+        [
+            o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(0.9),
+            o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(distance_threshold)
+        ],
+        o3d.pipelines.registration.RANSACConvergenceCriteria(100000, 0.999))
     return result
 
 
@@ -82,11 +79,12 @@ def refine_registration(source, target, source_fpfh, target_fpfh, voxel_size):
         o3d.pipelines.registration.TransformationEstimationPointToPlane())
     return result
 
+
 '''main code'''
 # Input
 voxel_size = 0.001  # 0.05 means 5cm for this dataset
-source, target, source_down, target_down, source_fpfh, target_fpfh = prepare_dataset(
-    voxel_size)
+source, target, source_down, target_down, source_fpfh, target_fpfh = prepare_dataset(voxel_size)
+
 # RANSAC
 start = time.time()
 result_ransac = execute_global_registration(source_down, target_down,
@@ -94,10 +92,11 @@ result_ransac = execute_global_registration(source_down, target_down,
                                             voxel_size)
 print("Global registration took %.3f sec.\n" % (time.time() - start))
 print(result_ransac)
+print(f"Result RANSAC transformation: \n{result_ransac.transformation}")
 draw_registration_result(source_down, target_down, result_ransac.transformation)
+
 # Local refinement
-result_icp = refine_registration(source, target, source_fpfh, target_fpfh,
-                                 voxel_size)
+result_icp = refine_registration(source_down, target_down, source_fpfh, target_fpfh, voxel_size)
 print(result_icp)
 draw_registration_result(source, target, result_icp.transformation)
 

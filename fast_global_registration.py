@@ -51,28 +51,8 @@ def prepare_dataset(voxel_size):
     return source, target, source_down, target_down, source_fpfh, target_fpfh
 
 
-# RANSAC
-def execute_global_registration(source_down, target_down, source_fpfh,
-                                target_fpfh, voxel_size):
-    distance_threshold = voxel_size * 1.5
-    print(":: RANSAC registration on downsampled point clouds.")
-    print("   Since the downsampling voxel size is %.3f," % voxel_size)
-    print("   we use a liberal distance threshold %.3f." % distance_threshold)
-    result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
-        source_down, target_down, source_fpfh, target_fpfh, True,
-        distance_threshold,
-        o3d.pipelines.registration.TransformationEstimationPointToPoint(False),
-        3, [
-            o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(
-                0.9),
-            o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(
-                distance_threshold)
-        ], o3d.pipelines.registration.RANSACConvergenceCriteria(100000, 0.999))
-    return result
-
-
-def execute_fast_global_registration(source_down, target_down, source_fpfh,
-                                     target_fpfh, voxel_size):
+# Fast Global Registration
+def execute_fast_global_registration(source_down, target_down, source_fpfh, target_fpfh, voxel_size):
     distance_threshold = voxel_size * 0.5
     print(":: Apply fast global registration with distance threshold %.3f" \
             % distance_threshold)
@@ -95,10 +75,12 @@ def refine_registration(source, target, source_fpfh, target_fpfh, voxel_size):
     return result
 
 
+'''main code'''
 # Input
 voxel_size = 0.001  # means 5cm for the dataset
 source, target, source_down, target_down, source_fpfh, target_fpfh = prepare_dataset(voxel_size)
-# RANSAC
+
+# Fast Global Registration
 start = time.time()
 result_fast = execute_fast_global_registration(source_down, target_down,
                                                source_fpfh, target_fpfh,
@@ -106,7 +88,8 @@ result_fast = execute_fast_global_registration(source_down, target_down,
 print("Fast global registration took %.3f sec.\n" % (time.time() - start))
 print(result_fast)
 draw_registration_result(source_down, target_down, result_fast.transformation)
+
 # Local refinement
-result_icp = refine_registration(source, target, source_fpfh, target_fpfh, voxel_size)
+result_icp = refine_registration(source_down, target_down, source_fpfh, target_fpfh, voxel_size)
 print(result_icp)
 draw_registration_result(source, target, result_icp.transformation)
