@@ -82,7 +82,7 @@ def refine_registration(source, target, source_fpfh, target_fpfh, voxel_size):
 
 '''main code'''
 # Input
-voxel_size = 0.001  # 0.05 means 5cm for this dataset
+voxel_size = 0.009  # 0.05 means 5cm for this dataset
 source, target, source_down, target_down, source_fpfh, target_fpfh = prepare_dataset(voxel_size)
 
 # RANSAC
@@ -93,10 +93,11 @@ result_ransac = execute_global_registration(source_down, target_down,
 print("Global registration took %.3f sec.\n" % (time.time() - start))
 print(result_ransac)
 print(f"Result RANSAC transformation: \n{result_ransac.transformation}")
-draw_registration_result(source_down, target_down, result_ransac.transformation)
+# draw_registration_result(source_down, target_down, result_ransac.transformation)
 
 # Local refinement
 result_icp = refine_registration(source_down, target_down, source_fpfh, target_fpfh, voxel_size)
+print("Global registration plus Local refinement took %.3f sec.\n" % (time.time() - start))
 print(result_icp)
 draw_registration_result(source, target, result_icp.transformation)
 

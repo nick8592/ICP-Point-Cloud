@@ -77,7 +77,7 @@ def refine_registration(source, target, source_fpfh, target_fpfh, voxel_size):
 
 '''main code'''
 # Input
-voxel_size = 0.001  # means 5cm for the dataset
+voxel_size = 0.009  # means 5cm for the dataset
 source, target, source_down, target_down, source_fpfh, target_fpfh = prepare_dataset(voxel_size)
 
 # Fast Global Registration
@@ -87,9 +87,10 @@ result_fast = execute_fast_global_registration(source_down, target_down,
                                                voxel_size)
 print("Fast global registration took %.3f sec.\n" % (time.time() - start))
 print(result_fast)
-draw_registration_result(source_down, target_down, result_fast.transformation)
+# draw_registration_result(source_down, target_down, result_fast.transformation)
 
 # Local refinement
 result_icp = refine_registration(source_down, target_down, source_fpfh, target_fpfh, voxel_size)
+print("Fast global registration plus Local refinement took %.3f sec.\n" % (time.time() - start))
 print(result_icp)
 draw_registration_result(source, target, result_icp.transformation)
