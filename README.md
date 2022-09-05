@@ -4,6 +4,8 @@
  - Open3D 0.15.1
  - Numpy 1.23.2
  
+ Caution! Linux don't have Open3D 0.15.1, check https://github.com/isl-org/Open3D/issues/4796#issuecomment-1054914476
+ 
 ## References
 ### Open3D
  - [Global registration](http://www.open3d.org/docs/release/tutorial/pipelines/global_registration.html#Global-registration)
