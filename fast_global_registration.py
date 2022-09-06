@@ -26,13 +26,19 @@ def preprocess_point_cloud(pcd, voxel_size):
     print(":: Estimate normal with search radius %.3f." % radius_normal)
     pcd_down.estimate_normals(
         o3d.geometry.KDTreeSearchParamHybrid(radius=radius_normal, max_nn=30))
+    # pcd.estimate_normals(
+    #     o3d.geometry.KDTreeSearchParamHybrid(radius=radius_normal, max_nn=30))
 
     radius_feature = voxel_size * 5
     print(":: Compute FPFH feature with search radius %.3f." % radius_feature)
     pcd_fpfh = o3d.pipelines.registration.compute_fpfh_feature(
         pcd_down,
         o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
+    # pcd_fpfh = o3d.pipelines.registration.compute_fpfh_feature(
+    #     pcd,
+    #     o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
     return pcd_down, pcd_fpfh
+    # return pcd, pcd_fpfh
 
 
 # Input
@@ -41,6 +47,8 @@ def prepare_dataset(voxel_size):
 
     source = o3d.io.read_point_cloud(SOURCE_PCD)
     target = o3d.io.read_point_cloud(TARGET_PCD)
+    print(f":: Source points amount: {len(source.points)}")
+    print(f":: Target points amount: {len(target.points)}")
     trans_init = np.asarray([[0.0, 0.0, 1.0, 0.0], [1.0, 0.0, 0.0, 0.0],
                              [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]])
     source.transform(trans_init)
@@ -48,6 +56,8 @@ def prepare_dataset(voxel_size):
 
     source_down, source_fpfh = preprocess_point_cloud(source, voxel_size)
     target_down, target_fpfh = preprocess_point_cloud(target, voxel_size)
+    print(f":: Downsample source points amount: {len(source_down.points)}")
+    print(f":: Downsample target points amount: {len(target_down.points)}")
     return source, target, source_down, target_down, source_fpfh, target_fpfh
 
 
@@ -77,7 +87,7 @@ def refine_registration(source, target, source_fpfh, target_fpfh, voxel_size):
 
 '''main code'''
 # Input
-voxel_size = 0.009  # means 5cm for the dataset
+voxel_size = 0.005  # 0.05 means 5cm for the dataset
 source, target, source_down, target_down, source_fpfh, target_fpfh = prepare_dataset(voxel_size)
 
 # Fast Global Registration
